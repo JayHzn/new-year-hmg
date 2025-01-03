@@ -1,0 +1,40 @@
+version: '3.8'
+
+networks:
+  nyh_network:
+
+services:
+  frontend:
+    build: ./front
+    container_name: front
+    volumes:
+      - ./front:/src/app
+    ports:
+      - "5173:5173"
+    networks:
+      - nyh_network
+
+  backend:
+    build: ./back
+    container_name: back
+    volumes:
+      - ./back:/src/app
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://localhost:27017/nyh_db
+    networks:
+      - nyh_network
+  
+  mongo:
+    image: mongo:5.0
+    container_name: db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - nyh_network
+
+volumes:
+  mongo-data:
