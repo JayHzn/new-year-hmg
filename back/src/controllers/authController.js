@@ -28,6 +28,12 @@ export const signUp = async (req, res) => {
 
         await newUser.save();
 
+        const {password: _, ...userWithoutPassword } = savedUser.toObject();
+        res.status(201).json({
+            user: userWithoutPassword,
+            message: "User created successfully",
+        });
+
         const token = jwt.sign(
             { userId: newUser.id, email: newUser.email },
             process.env.JWT_SECRET,
@@ -59,11 +65,10 @@ export const signIn = async (req, res) => {
                 message: "User not find"
             });
         }
-        if  (!user.password) {
-            return res.status(404).json({
-                success: false,
-                message: "Incorrect password"
-            });
+        
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: "Invalid credentials" });
         }
 
         const token = jwt.sign({ userId: user.id },
