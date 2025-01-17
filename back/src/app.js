@@ -1,8 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
-import connectToDatabase from "./config/database";
-import userRoutes from "./routes/users";
-import authRoutes from "./routes/auth";
+import connectToDatabase from "../src/config/database.js";
+import userRoutes from "../src/routes/users.js";
+import authRoutes from "../src/routes/auth.js";
 
 const app = express();
 
@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 connectToDatabase();
 
 // Ajout des routes
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 
 // Démarrage du serveur
