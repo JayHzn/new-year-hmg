@@ -1,10 +1,14 @@
+import 'dotenv/config';
 import express from "express";
+import cors from "cors";
 import bodyParser from "body-parser";
 import connectToDatabase from "../src/config/database.js";
 import userRoutes from "../src/routes/users.js";
 import authRoutes from "../src/routes/auth.js";
 
 const app = express();
+
+app.use(cors());
 
 // Middleware pour traiter les données JSON
 app.use(bodyParser.json());

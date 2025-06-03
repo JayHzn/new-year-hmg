@@ -4,9 +4,17 @@ import User from "../models/user.js";
 
 export const signUp = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const {
+            firstname,
+            lastname,
+            username,
+            email,
+            password,
+            bOrganizer = false,
+            companyName = '',
+        } = req.body;
 
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await User.findOne({ email });
 
         if (existingUser) {
             return res.status(400).json({
@@ -18,24 +26,19 @@ export const signUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({
-            firstName,
-            lastName,
-            username,
-            email,
+            firstName: firstname,
+            lastName: lastname,
+            username: username,
+            email: email,
             password: hashedPassword,
-            bOrganizer,
+            bOrganizer: bOrganizer,
+            companyName: bOrganizer ? companyName : undefined,
         });
 
         await newUser.save();
 
-        const {password: _, ...userWithoutPassword } = savedUser.toObject();
-        res.status(201).json({
-            user: userWithoutPassword,
-            message: "User created successfully",
-        });
-
         const token = jwt.sign(
-            { userId: newUser.id, email: newUser.email },
+            { userId: newUser._id, email: newUser.email },
             process.env.JWT_SECRET,
             { expiresIn: "3h" }
         );
@@ -46,6 +49,12 @@ export const signUp = async (req, res) => {
             token,
         });
     } catch (e) {
+        console.error("signUp error:", e);
+        if (e.name === "ValidationError") {
+            const messages = Object.values(e.errors).map((e) => e.message);
+            return res.status(400).json({ success: false, errors: messages });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Registration failed, something went wrong",
@@ -55,14 +64,14 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ username });
 
         if (!user) {
             return res.status(400).json({
                 success: false,
-                message: "User not find"
+                message: "User not found"
             });
         }
         

@@ -11,6 +11,8 @@ services:
       - ./front:/src/app
     ports:
       - "5173:5173"
+    env_file:
+      - ./front/.env
     networks:
       - nyh_network
 
@@ -21,6 +23,8 @@ services:
       - ./back:/src/app
     ports:
       - "3000:3000"
+    env_file:
+      - ./back/.env
     environment:
       - MONGO_URI=mongodb://mongo:27017/nyh_db
     networks:
