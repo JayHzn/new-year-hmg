@@ -24,7 +24,16 @@ export const getUserById = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
-    const { firstName, lastName, username, email, password, bActive, bOrganizer } = req.body;
+    const {
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        bActive,
+        bOrganizer = false,
+        companyName = '',
+    } = req.body;
 
     if (!username || !email || !password) {
         return res.status(400).json({
@@ -38,18 +47,19 @@ export const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds)
 
         const newUser = new User({
-            firstName,
-            lastName,
-            username,
-            email,
+            firstName: firstName,
+            lastName: lastName,
+            username: username,
+            email: email,
             password: hashedPassword,
             bActive,
-            bOrganizer,
+            bOrganizer: bOrganizer,
+            companyName: bOrganizer ? companyName : null,
         });
 
         const savedUser = await newUser.save();
 
-        const {password: _, ...userWithoutPassword } = savedUser.toObject();
+        const {password: _, ...userWithoutPassword } = savedUser.toJSON();
         res.status(201).json({
             user: userWithoutPassword,
             message: "User created successfully",
