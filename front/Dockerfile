@@ -1,15 +1,15 @@
-FROM node:18
+FROM --platform=linux/arm64 node:18 AS build
+WORKDIR /usr/src/app
 
-RUN npm install -g http-server
+COPY package.json package-lock.json angular.json tsconfig*.json ./
 
-WORKDIR /src/app
+RUN npm install
 
-COPY package*.json ./
+COPY src ./src
+COPY public ./public
 
-COPY . .
+RUN npm run build
 
-EXPOSE 5173
-
-RUN chmod +x ./entrypoint.sh
-
-ENTRYPOINT [ "./entrypoint.sh" ]
+FROM --platform=linux/arm64 nginx:stable-alpine
+COPY --from=build /usr/src/app/dist/front /usr/share/nginx/html
+EXPOSE 80

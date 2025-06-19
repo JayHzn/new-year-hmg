@@ -4,35 +4,12 @@ networks:
   nyh_network:
 
 services:
-  frontend:
-    build: ./front
-    container_name: front
-    volumes:
-      - ./front:/src/app
-    ports:
-      - "5173:5173"
-    env_file:
-      - ./front/.env
-    networks:
-      - nyh_network
-
-  backend:
-    build: ./back
-    container_name: back
-    volumes:
-      - ./back:/src/app
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./back/.env
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/nyh_db
-    networks:
-      - nyh_network
-  
   mongo:
     image: mongo:5.0
     container_name: db
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: nyh_db
     ports:
       - "27017:27017"
     volumes:
@@ -40,5 +17,41 @@ services:
     networks:
       - nyh_network
 
+  backend:
+    platform: linux/arm64
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: back
+    depends_on:
+      - mongo
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/nyh_db
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./back/src:/app/src
+      - ~/.m2:/root/.m2
+    networks:
+      - nyh_network
+
+  frontend:
+    platform: linux/arm64
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: front
+    depends_on:
+      - backend
+    volumes:
+      - ./front/src:/usr/src/app/src
+      - /usr/src/app/node_modules
+    ports:
+      - "4200:80"
+    networks:
+      - nyh_network
+
 volumes:
   mongo-data:
+  m2-data:
+  node-modules:
