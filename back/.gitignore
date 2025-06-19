@@ -1,30 +1,77 @@
+# ------------------------------
+# Java & Maven
+# ------------------------------
+# Compiled classes
+*.class
+
+# Maven target directory
+target/
+
+# Maven wrapper
+.mvn/
+!mvnw
+!mvnw.cmd
+
+# Maven files
+dependency-reduced-pom.xml
+release.properties
+pom.xml.tag
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# ------------------------------
+# Spring Boot
+# ------------------------------
+# Spring Boot repackaged jar
+*.jar
+# Actuator logs (si configurés)
+spring.log
+
+# ------------------------------
 # Logs
-logs
+# ------------------------------
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
+# ------------------------------
+# IDEs
+# ------------------------------
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# ------------------------------
+# OS
+# ------------------------------
+# macOS
 .DS_Store
-dist
-dist-ssr
-coverage
-*.local
 
-/cypress/videos/
-/cypress/screenshots/
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# ------------------------------
+# Autres
+# ------------------------------
+# Fichiers de configuration locaux
+application.properties
+application.yml
+application-*.properties
+application-*.yml
+!application-prod.properties   # si vous voulez versionner le prod
+!application-prod.yml
 
-*.tsbuildinfo
+# fichiers temporaires
+*.tmp
