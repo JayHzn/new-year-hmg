@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.Set;
+import java.util.HashSet;
 
 @Document(collection = "users")
 public class User {
@@ -19,12 +21,15 @@ public class User {
     @NotBlank(message = "Password is mandatory")
     private String password;
 
+    private Set<String> roles = new HashSet<>();
+
     public User() {}
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, Set<String> roles) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.roles = roles;
     }
 
     public String getId() { return id; }
@@ -38,4 +43,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; } 
+
+    public Set<String> getRoles() { return roles; }
+    public void setRoles(Set<String> roles) { this.roles = roles; }
 }
