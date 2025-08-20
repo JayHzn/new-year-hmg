@@ -3,6 +3,7 @@ package com.example.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,11 @@ public class JwtUtil {
     public JwtUtil() {
         String secret = "JadoreLePouletBraiseCestTropBon!";
         this.signinKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String generateToken(Authentication authentication) {
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        return generateToken(userPrincipal);
     }
 
     public String generateToken(UserDetails userDetails) {
