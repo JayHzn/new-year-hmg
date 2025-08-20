@@ -1,63 +1,77 @@
 package com.example.controller;
 
 import com.example.model.User;
+import com.example.model.Role;
+import com.example.payload.request.UpdateUserRequest;
+import com.example.payload.response.UserDto;
 import com.example.repository.UserRepository;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
-@Validated
 public class UserController {
     private final UserRepository repo;
+    private final PasswordEncoder passwordEncoder;
     
-    public UserController(UserRepository repo) {
+    public UserController(UserRepository repo, PasswordEncoder passwordEncoder) {
         this.repo = repo;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    // CREATE
-    @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        User saved = repo.save(user);
-        return ResponseEntity.ok(saved);
+    private UserDto toDto(User u) {
+        return new UserDto(
+            u.getId(),
+            u.getFirstname(),
+            u.getLastname(),
+            u.getUsername(),
+            u.getEmail(),
+            u.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
+            u.getAssociationId()
+        );
     }
 
-    // READ ALL
     @GetMapping
-    public List<User> findAll() {
-        return repo.findAll();
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserDto> listAll() {
+        return repo.findAll().stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
     }
 
-    // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable String id) {
-        Optional<User> opt = repo.findById(id);
-        return opt.map(ResponseEntity::ok)
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.username")
+    public ResponseEntity<UserDto> getById(@PathVariable String id) {
+        return repo.findById(id)
+            .map(u -> ResponseEntity.ok(toDto(u)))
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(
-            @PathVariable String id,
-            @Valid @RequestBody User newData) {
-        return repo.findById(id)
-                .map(user -> {
-                    user.setUsername(newData.getUsername());
-                    user.setEmail(newData.getEmail());
-                    user.setPassword(newData.getPassword());
-                    return ResponseEntity.ok(repo.save(user));
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @PreAuthorize("#id == principal.username")
+    public ResponseEntity<UserDto> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserRequest req) {
+        return repo.findById(id).map(u -> {
+            u.setFirstname(req.getFirstname());
+            u.setLastname(req.getLastname());
+            if (req.getPassword() != null && !req.getPassword().isBlank()) {
+                u.setPassword(passwordEncoder.encode(req.getPassword()));
+            }
+            User updated = repo.save(u);
+            return ResponseEntity.ok(toDto(updated));
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         if (!repo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
