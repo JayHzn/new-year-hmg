@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.security.GlobalExceptionHandler;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -107,7 +106,7 @@ public class UserService {
             u.getLastname(),
             u.getUsername(),
             u.getEmail(),
-            u.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
+            u.getRoles(),
             u.getAssociationId()
         );
     }

@@ -1,12 +1,10 @@
 package com.example.controller;
 
 import com.example.model.User;
-import com.example.model.Role;
 import com.example.payload.request.UpdateUserRequest;
 import com.example.payload.response.UserDto;
 import com.example.repository.UserRepository;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,7 +31,7 @@ public class UserController {
             u.getLastname(),
             u.getUsername(),
             u.getEmail(),
-            u.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
+            u.getRoles(),
             u.getAssociationId()
         );
     }
@@ -44,7 +41,7 @@ public class UserController {
     public List<UserDto> listAll() {
         return repo.findAll().stream()
             .map(this::toDto)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @GetMapping("/{id}")
